@@ -1,0 +1,5 @@
+[deps]
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+EventTracker = "728c7d88-e2eb-426d-8b16-b388a5118a12"
+EventTrackerBase = "f7d4269e-f741-4ac4-a0be-93f99edcd4f2"
+Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"

@@ -1,0 +1,7 @@
+name = "EventTrackerBase"
+uuid = "f7d4269e-f741-4ac4-a0be-93f99edcd4f2"
+authors = ["Takafumi Arakaki <aka.tkf@gmail.com> and contributors"]
+version = "0.1.0"
+
+[deps]
+RecordArrays = "f09397d6-3230-428f-8b46-6217caaab93c"
