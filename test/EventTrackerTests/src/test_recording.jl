@@ -1,8 +1,8 @@
 module TestRecording
 
 using EventTracker
-using EventTracker: EVENT_INTERVAL, EVENT_POINT, EventKind
-using EventTrackerBase: LocationProxy, RecordHandle, EventTrackerBase
+using EventTracker: EVENT_INTERVAL, EVENT_POINT
+using EventTrackerBase: LocationProxy, EventTrackerBase
 using Test
 
 function test_location_hack()
@@ -16,50 +16,43 @@ function test_location_hack()
 end
 
 function record_once()
-    handle = @recordinterval :record_once begin
+    ans = @recordinterval :record_once begin
         y = 1
     end
-    return y, handle
+    return (ans, y)
 end
 
 function test_record_once()
-    y, handle = record_once()
-    @test y == 1
-    @test handle isa RecordHandle
-    @test EventKind(handle) === EVENT_INTERVAL
+    @test record_once() == (1, 1)
 end
 
 function no_tag()
-    handle = @recordinterval y = 1
-    return y, handle
+    ans = @recordinterval y = 1
+    return (ans, y)
 end
 
 function test_no_tag()
-    y, handle = no_tag()
-    @test y == 1
-    @test handle isa RecordHandle
+    @test no_tag() == (1, 1)
 end
 
 record_point_once() = @recordpoint
 
 function test_record_point_once()
-    handle = record_point_once()
-    @test handle isa RecordHandle
-    @test EventKind(handle) === EVENT_POINT
+    @test record_point_once() === nothing
 end
 
 function test_record_in_spawn()
     tasks = map(1:10) do i
         Threads.@spawn begin
-            handle = @recordinterval :record_in_spawn begin
+            ans = @recordinterval :record_in_spawn begin
                 y = i * 10
             end
-            return (y == i * 10), handle
+            return (ans, y)
         end
     end
     results = fetch.(tasks)
-    @test all(first, results)
-    @test all(handle isa RecordHandle for (_, handle) in results)
+    @test first.(results) == (1:10) .* 10
+    @test last.(results) == (1:10) .* 10
 end
 
 end  # module

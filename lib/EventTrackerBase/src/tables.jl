@@ -65,7 +65,6 @@ function eventkind_from_stop(stop::TimeNS)
 end
 
 EventKind(record::IntervalRecord) = eventkind_from_stop(record.stop)
-EventKind(handle::RecordHandle) = eventkind_from_stop(handle.__handle.stop[])
 
 # TODO: is it better to do this inside RawEventID (and get rid of it)?
 function EventID(event::RawEventID)

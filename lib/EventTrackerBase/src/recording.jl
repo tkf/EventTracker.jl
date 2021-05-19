@@ -177,12 +177,6 @@ macro recordpoint(tag::Symbol)
 end
 
 
-struct RecordHandle
-    __handle::RawHandle
-    __location::LocationProxy
-    __event::RawEventID
-end
-
 # Rooting is probably unnecessary and is done by the compiler automatically
 # already. But maybe it's also nice to iterate over instrumented locations
 # anyway?
@@ -201,9 +195,9 @@ function recordinterval_impl(__source__, __module__, tag::Symbol, code)
         local location = $(QuoteNode(location))
         local event = $event_id()
         local handle = $interval_begin(location, event)
-        $(esc(Expr(:block, __source__, code)))
+        local ans = $(esc(Expr(:block, __source__, code)))
         $interval_end!(handle)
-        $RecordHandle(handle, location, event)
+        ans
     end
 end
 
@@ -214,7 +208,7 @@ function recordpoint_impl(__source__, __module__, tag::Symbol)
         local location = $(QuoteNode(location))
         local event = $event_id()
         local handle = $_record_point(location, event)
-        $RecordHandle(handle, location, event)
+        nothing
     end
 end
 
