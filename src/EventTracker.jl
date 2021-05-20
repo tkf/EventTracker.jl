@@ -46,10 +46,13 @@ using EventTrackerBase:
 
 using ..EventTracker: EventTracker
 
+include("utils.jl")
 include("analysis.jl")
 include("stacks.jl")
 include("plots.jl")
 
 end
+
+Implementations.define_docstrings()
 
 end  # module
