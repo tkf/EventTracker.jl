@@ -37,3 +37,12 @@ julia> df = EventTracker.summary_dataframe()
    1 │     11        6.01317e-5                3  REPL[2]  Main     17718374492314440  EVENT_INTERVAL  139675751155888
    2 │      1  missing                         5  REPL[2]  Main     17718374492316350  EVENT_POINT     139675753020864
 ``````
+
+## See also:
+
+* [Profiling · The Julia Language](https://docs.julialang.org/en/v1/manual/profile/)
+* [StopWatches.jl](https://github.com/tkf/StopWatches.jl):
+   Simple intrusive time measurements
+* [TimerOutputs.jl](https://github.com/KristofferC/TimerOutputs.jl):
+  Formatted output of timed sections in Julia.
+* [JuliaPerf/*.jl](https://github.com/JuliaPerf)
