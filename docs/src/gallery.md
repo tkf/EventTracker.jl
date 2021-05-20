@@ -38,8 +38,7 @@ function fib(n)
     n <= 1 && return n
     t = @async begin
         rand(Bool) && yield()  # introduce more task jugglings
-        @recordinterval :fib1 local a = fib(n - 1)
-        a
+        @recordinterval :fib1 fib(n - 1)
     end
     @recordinterval :fib2 b = fib(n - 2)
     return (fetch(t)::Int) + b
@@ -100,7 +99,7 @@ Ref: [Tak (function) - Wikipedia](https://en.wikipedia.org/wiki/Tak_(function))
 using EventTracker
 
 function tarai(x, y, z)
-    @recordinterval result = if y < x
+    @recordinterval if y < x
         tarai(
             tarai(x - 1, y, z),
             tarai(y - 1, z, x),
@@ -110,7 +109,6 @@ function tarai(x, y, z)
         @recordpoint
         y
     end
-    return result
 end
 
 EventTracker.clear()
