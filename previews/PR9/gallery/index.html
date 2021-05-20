@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Gallery · EventTracker</title><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit">EventTracker</span></div><form class="docs-search" action="../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../">EventTracker.jl</a></li><li class="is-active"><a class="tocitem" href>Gallery</a><ul class="internal"><li><a class="tocitem" href="#Fibonacci"><span>Fibonacci</span></a></li><li><a class="tocitem" href="#Tarai"><span>Tarai</span></a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Gallery</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Gallery</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/tkf/EventTracker.jl/blob/master/docs/src/gallery.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Gallery"><a class="docs-heading-anchor" href="#Gallery">Gallery</a><a id="Gallery-1"></a><a class="docs-heading-anchor-permalink" href="#Gallery" title="Permalink"></a></h1><h2 id="Fibonacci"><a class="docs-heading-anchor" href="#Fibonacci">Fibonacci</a><a id="Fibonacci-1"></a><a class="docs-heading-anchor-permalink" href="#Fibonacci" title="Permalink"></a></h2><h3 id="Serial-fibonacci"><a class="docs-heading-anchor" href="#Serial-fibonacci">Serial fibonacci</a><a id="Serial-fibonacci-1"></a><a class="docs-heading-anchor-permalink" href="#Serial-fibonacci" title="Permalink"></a></h3><pre><code class="language-julia">using EventTracker
+
+function fib(n)
+    n &lt;= 1 &amp;&amp; return n
+    @recordinterval :fib1 a = fib(n - 1)
+    @recordinterval :fib2 b = fib(n - 2)
+    return a + b
+end
+
+EventTracker.clear()
+fib(10)
+
+df = EventTracker.summary_dataframe()</code></pre><table class="data-frame"><thead><tr><th></th><th>ncalls</th><th>time</th><th>tag</th><th>line</th><th>file</th><th>_module</th><th>firstcall</th><th>eventkind</th><th>locationid</th></tr><tr><th></th><th>Int64</th><th>Float64</th><th>Union…?</th><th>Int64?</th><th>Union…?</th><th>Module?</th><th>UInt64</th><th>EventKi…</th><th>UInt64</th></tr></thead><tbody><p>2 rows × 9 columns</p><tr><th>1</th><td>88</td><td>6.69318e-7</td><td>fib1</td><td>4</td><td>none</td><td>Main.ex-fibonacci-serial</td><td>275919612554</td><td>EVENT_INTERVAL</td><td>139795260763120</td></tr><tr><th>2</th><td>88</td><td>3.20455e-7</td><td>fib2</td><td>5</td><td>none</td><td>Main.ex-fibonacci-serial</td><td>275919613854</td><td>EVENT_INTERVAL</td><td>139795260763168</td></tr></tbody></table><pre><code class="language-julia">using Plots
+stks = EventTracker.stacks()
+plot(stks)</code></pre><p><img src="../fibonacci-serial-stacks.svg" alt/></p><h3 id="Parallel-fibonacci"><a class="docs-heading-anchor" href="#Parallel-fibonacci">Parallel fibonacci</a><a id="Parallel-fibonacci-1"></a><a class="docs-heading-anchor-permalink" href="#Parallel-fibonacci" title="Permalink"></a></h3><pre><code class="language-julia">using EventTracker
+
+function fib(n)
+    n &lt;= 1 &amp;&amp; return n
+    t = @async begin
+        rand(Bool) &amp;&amp; yield()  # introduce more task jugglings
+        @recordinterval :fib1 local a = fib(n - 1)
+        a
+    end
+    @recordinterval :fib2 b = fib(n - 2)
+    return (fetch(t)::Int) + b
+end</code></pre><pre><code class="language-julia">function withspin(f)
+    done = Threads.Atomic{Bool}(false)
+    @sync begin
+        Threads.@spawn begin
+            while !done[]
+                @recordpoint :spin
+                yield()
+            end
+        end
+        try
+            f()
+        finally
+            done[] = true
+        end
+    end
+end
+
+function run_fibs_with_spin(nums)
+    withspin() do
+        for n in nums
+            fib(n)
+        end
+    end
+end
+run_fibs_with_spin([5, 6, 7])  # invoke compilation</code></pre><pre><code class="language-julia">EventTracker.clear()
+run_fibs_with_spin([5, 6, 7])
+
+df = EventTracker.summary_dataframe()</code></pre><table class="data-frame"><thead><tr><th></th><th>ncalls</th><th>time</th><th>tag</th><th>line</th><th>file</th><th>_module</th><th>firstcall</th><th>eventkind</th><th>locationid</th></tr><tr><th></th><th>Int64</th><th>Float64?</th><th>Union…?</th><th>Int64?</th><th>Union…?</th><th>Module?</th><th>UInt64</th><th>EventKi…</th><th>UInt64</th></tr></thead><tbody><p>3 rows × 9 columns</p><tr><th>1</th><td>39</td><td>2.07129e-5</td><td>fib2</td><td>9</td><td>none</td><td>Main.ex-fibonacci-spin</td><td>324693115289</td><td>EVENT_INTERVAL</td><td>139795269172912</td></tr><tr><th>2</th><td>37</td><td><em>missing</em></td><td>spin</td><td>6</td><td>none</td><td>Main.ex-fibonacci-spin</td><td>324693120689</td><td>EVENT_POINT</td><td>139795291809072</td></tr><tr><th>3</th><td>39</td><td>3.38003e-5</td><td>fib1</td><td>6</td><td>none</td><td>Main.ex-fibonacci-spin</td><td>324693122089</td><td>EVENT_INTERVAL</td><td>139795269172864</td></tr></tbody></table><pre><code class="language-julia">using Plots
+stks = EventTracker.stacks()
+plot(stks)</code></pre><p><img src="../fibonacci-spin-stacks.svg" alt/></p><h2 id="Tarai"><a class="docs-heading-anchor" href="#Tarai">Tarai</a><a id="Tarai-1"></a><a class="docs-heading-anchor-permalink" href="#Tarai" title="Permalink"></a></h2><p>Ref: <a href="https://en.wikipedia.org/wiki/Tak_(function)">Tak (function) - Wikipedia</a></p><pre><code class="language-julia">using EventTracker
+
+function tarai(x, y, z)
+    @recordinterval result = if y &lt; x
+        tarai(
+            tarai(x - 1, y, z),
+            tarai(y - 1, z, x),
+            tarai(z - 1, x, y),
+        )
+    else
+        @recordpoint
+        y
+    end
+    return result
+end
+
+EventTracker.clear()
+tarai(3, 1, 7)
+df = EventTracker.summary_dataframe()</code></pre><table class="data-frame"><thead><tr><th></th><th>ncalls</th><th>time</th><th>tag</th><th>line</th><th>file</th><th>_module</th><th>firstcall</th><th>eventkind</th><th>locationid</th></tr><tr><th></th><th>Int64</th><th>Float64?</th><th>Union…?</th><th>Int64?</th><th>Union…?</th><th>Module?</th><th>UInt64</th><th>EventKi…</th><th>UInt64</th></tr></thead><tbody><p>2 rows × 9 columns</p><tr><th>1</th><td>461</td><td>1.48959e-6</td><td></td><td>3</td><td>none</td><td>Main.ex-tarai-serial</td><td>329075139399</td><td>EVENT_INTERVAL</td><td>139795792604864</td></tr><tr><th>2</th><td>346</td><td><em>missing</em></td><td></td><td>10</td><td>none</td><td>Main.ex-tarai-serial</td><td>329075139899</td><td>EVENT_POINT</td><td>139795792605008</td></tr></tbody></table><pre><code class="language-julia">using Plots
+stks = EventTracker.stacks()
+plot(stks)</code></pre><p><img src="../tarai-serial-stacks.png" alt/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« EventTracker.jl</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Thursday 20 May 2021 17:28">Thursday 20 May 2021</span>. Using Julia version 1.6.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
