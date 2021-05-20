@@ -119,8 +119,8 @@ const RawHandle = let
 end
 
 """
-    @recordinterval(tag, code) -> handle
-    @recordinterval(code) -> handle
+    @recordinterval tag code
+    @recordinterval code
 
 Record the start and stop times for executing `code`.
 
@@ -134,10 +134,8 @@ julia> using EventTrackerBase
 
 julia> @recordinterval begin
            sleep(0.01)
-           a = 1
-       end;
-
-julia> a
+           1
+       end
 1
 ```
 
@@ -158,8 +156,8 @@ macro recordinterval(tag::Symbol, code)
 end
 
 """
-    @recordpoint(tag) -> handle
-    @recordpoint() -> handle
+    @recordpoint tag
+    @recordpoint
 
 Record the times this part of code is executed.
 """
