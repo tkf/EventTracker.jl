@@ -19,6 +19,7 @@ jobs:
       - run: |
           using Pkg
           Pkg.activate(".")
+          Pkg.rm("EventTrackerBase")
           Pkg.add(url="https://github.com/tkf/RecordArrays.jl")
           Pkg.develop(path="lib/EventTrackerBase")
           Pkg.test()
