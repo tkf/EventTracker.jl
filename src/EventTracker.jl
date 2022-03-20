@@ -28,6 +28,7 @@ module Implementations
 
 using BangBang.Extras: modify!!
 using DataFrames: DataFrame, combine, groupby, select!, Not, leftjoin
+using ExternalDocstrings: @define_docstrings
 using RecipesBase: RecipesBase, @recipe, @series
 using Statistics: mean
 using StructArrays: StructVector
@@ -46,13 +47,12 @@ using EventTrackerBase:
 
 using ..EventTracker: EventTracker
 
-include("utils.jl")
 include("analysis.jl")
 include("stacks.jl")
 include("plots.jl")
 
 end
 
-Implementations.define_docstrings()
+Implementations.@define_docstrings
 
 end  # module
