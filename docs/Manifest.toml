@@ -135,7 +135,7 @@ uuid = "5ae413db-bbd1-5e63-b57d-d24a61df00f5"
 version = "2.1.5+1"
 
 [[EventTracker]]
-deps = ["BangBang", "DataFrames", "EventTrackerBase", "RecipesBase", "Requires", "Statistics", "StructArrays", "Tables"]
+deps = ["BangBang", "DataFrames", "EventTrackerBase", "ExternalDocstrings", "RecipesBase", "Requires", "Statistics", "StructArrays", "Tables"]
 path = ".."
 uuid = "728c7d88-e2eb-426d-8b16-b388a5118a12"
 version = "0.1.0"
@@ -151,6 +151,13 @@ deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "b3bfd02e98aedfa5cf885665493c5598c350cd2f"
 uuid = "2e619515-83b5-522b-bb60-26c02a35a201"
 version = "2.2.10+0"
+
+[[ExternalDocstrings]]
+git-tree-sha1 = "0c7f9dfc999acb13e54ed85e8bdb90bd285ff5a9"
+repo-rev = "main"
+repo-url = "https://github.com/tkf/ExternalDocstrings.jl.git"
+uuid = "e189563c-0753-4f5e-ad5c-be4293c83fb4"
+version = "0.1.0-DEV"
 
 [[FFMPEG]]
 deps = ["FFMPEG_jll", "x264_jll"]
